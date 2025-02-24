@@ -34,6 +34,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   bool _isVisible = false;
   int? selectedIndex;
+  bool _isLoading = false;
   List<String> catString = ['Assistance', 'Care', 'Househelp'];
 
   List<String> servnameCheck(int index) {
@@ -549,12 +550,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                                             backgroundColor: Colors.transparent,
                                             shadowColor: Colors.transparent,
                                           ),
-                                          onPressed: () {
-                                            Get.to(PersonGridView(
-                                              servname: servnameCheck(
-                                                  checkindex)[index],
-                                            ));
-                                          },
+                                          onPressed: _isLoading
+                                              ? null
+                                              : () {
+                                                  Get.to(PersonGridView(
+                                                    servname: servnameCheck(
+                                                        checkindex)[index],
+                                                  ));
+                                                },
                                           child: Ink(
                                             decoration: BoxDecoration(
                                               gradient: LinearGradient(
