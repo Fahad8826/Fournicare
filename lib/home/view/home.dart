@@ -1,8 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fourincare/aboutus/view/aboutus.dart';
 import 'package:fourincare/account/view/account.dart';
 import 'package:fourincare/appointment/view/appointment.dart';
+import 'package:fourincare/auth/view/login.dart';
 import 'package:fourincare/coustmercare/view/cousmercare.dart';
 import 'package:fourincare/person_select/person-select.dart';
 import 'package:get/get.dart';
@@ -35,52 +38,75 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   bool _isVisible = false;
   int? selectedIndex;
   bool _isLoading = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   List<String> catString = ['Assistance', 'Care', 'Househelp'];
 
   List<String> servnameCheck(int index) {
     if (index == 0) {
       return [
-        ...textModel.assiserviceName,
-        ...textModel.careserviceName,
-        ...textModel.houseserviceName
+        ...textModel.assiservices.map((service) => service.name),
+        ...textModel.careservices.map((service) => service.name),
+        ...textModel.houseservices.map((service) => service.name),
       ];
     } else if (index == 1) {
-      return textModel.assiserviceName;
+      return textModel.assiservices.map((service) => service.name).toList();
     } else if (index == 2) {
-      return textModel.careserviceName;
+      return textModel.careservices.map((service) => service.name).toList();
     } else {
-      return textModel.houseserviceName;
+      return textModel.houseservices.map((service) => service.name).toList();
     }
   }
 
   List<String> servDscCheck(int index) {
     if (index == 0) {
       return [
-        ...textModel.assiserviceDesc,
-        ...textModel.careserviceDesc,
-        ...textModel.houseserviceDesc
+        ...textModel.assiservices.map((service) => service.description),
+        ...textModel.careservices.map((service) => service.description),
+        ...textModel.houseservices.map((service) => service.description),
       ];
     } else if (index == 1) {
-      return textModel.assiserviceDesc;
+      return textModel.assiservices
+          .map((service) => service.description)
+          .toList();
     } else if (index == 2) {
-      return textModel.careserviceDesc;
+      return textModel.careservices
+          .map((service) => service.description)
+          .toList();
     } else {
-      return textModel.houseserviceDesc;
+      return textModel.houseservices
+          .map((service) => service.description)
+          .toList();
+    }
+  }
+
+  List<String> servImgCheck(int index) {
+    if (index == 0) {
+      return [
+        ...textModel.assiservices.map((service) => service.imageUrl),
+        ...textModel.careservices.map((service) => service.imageUrl),
+        ...textModel.houseservices.map((service) => service.imageUrl),
+      ];
+    } else if (index == 1) {
+      return textModel.assiservices.map((service) => service.imageUrl).toList();
+    } else if (index == 2) {
+      return textModel.careservices.map((service) => service.imageUrl).toList();
+    } else {
+      return textModel.houseservices
+          .map((service) => service.imageUrl)
+          .toList();
     }
   }
 
   String getCategoryType(int globalIndex) {
-    if (checkindex == 0) {
-      if (globalIndex < textModel.assiserviceName.length) {
-        return "Assistance";
-      } else if (globalIndex <
-          textModel.assiserviceName.length + textModel.careserviceName.length) {
-        return "Care";
-      } else {
-        return "Househelp";
-      }
+    int assiLength = textModel.assiservices.length;
+    int careLength = textModel.careservices.length;
+
+    if (globalIndex < assiLength) {
+      return "Assistance";
+    } else if (globalIndex < assiLength + careLength) {
+      return "Care";
     } else {
-      return catString[checkindex - 1];
+      return "Househelp";
     }
   }
 
@@ -196,7 +222,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           elevation: 0,
           iconTheme: IconThemeData(color: Colors.white, size: 28),
           title: Text(
-            '4 InCare',
+            'WeCare',
             style: GoogleFonts.montserrat(
               textStyle: TextStyle(
                 fontWeight: FontWeight.w700,
@@ -286,12 +312,98 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   CustomerCarePage(),
                 ),
                 Divider(thickness: 1.5),
-                _animatedDrawerItem(
-                  FontAwesomeIcons.signOutAlt,
-                  'Logout',
-                  null,
-                  isLogout: true,
-                ),
+                Container(
+                  margin: const EdgeInsets.only(right: 8.0),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                            ),
+                            title: const Text(
+                              'Logout',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20.0,
+                              ),
+                            ),
+                            content: const Text(
+                              'Are you sure you want to logout?',
+                              style: TextStyle(fontSize: 16.0),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.grey[600],
+                                ),
+                                child: const Text(
+                                  'Cancel',
+                                  style: TextStyle(fontSize: 15.0),
+                                ),
+                              ),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  await _auth.signOut();
+                                  if (mounted) {
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => const Login()),
+                                      (route) => false,
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.amber,
+                                  foregroundColor: Colors.black87,
+                                  elevation: 2,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0, vertical: 8.0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Logout',
+                                  style: TextStyle(
+                                      fontSize: 15.0,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                            contentPadding: const EdgeInsets.fromLTRB(
+                                24.0, 20.0, 24.0, 8.0),
+                            actionsPadding: const EdgeInsets.fromLTRB(
+                                16.0, 0.0, 16.0, 16.0),
+                            elevation: 5.0,
+                          );
+                        },
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.amber,
+                      foregroundColor: Colors.black87,
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 12.0),
+                    ),
+                    icon: const Icon(Icons.logout, size: 20),
+                    label: const Text(
+                      'Logout',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                )
               ],
             ),
           ),
@@ -496,7 +608,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                                 borderRadius: BorderRadius.vertical(
                                     top: Radius.circular(16)),
                                 child: Image.network(
-                                  'https://static.vecteezy.com/system/resources/previews/020/549/092/non_2x/teen-girl-carry-bags-helping-elderly-woman-with-grocery-shopping-kind-caring-granddaughter-hold-products-help-old-grandmother-with-heavy-packages-older-and-younger-generation-illustration-vector.jpg',
+                                  servImgCheck(checkindex)[
+                                      index], // Fetching image dynamically
                                   height: 200,
                                   width: double.infinity,
                                   fit: BoxFit.cover,

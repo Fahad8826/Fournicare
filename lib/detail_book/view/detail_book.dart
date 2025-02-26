@@ -247,6 +247,20 @@ class _DetailsAndBookState extends State<DetailsAndBook> {
     }
   }
 
+  Future<void> SelectTime(BuildContext context) async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: 12, minute: 0), // Default time
+    );
+
+    if (pickedTime != null) {
+      // Do something with the picked time
+      setState(() {
+        _timeController.text = pickedTime.format(context); // Update text field
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -389,6 +403,8 @@ class _DetailsAndBookState extends State<DetailsAndBook> {
                     Expanded(
                       child: TextFormField(
                         controller: _timeController,
+                        onTap: () => SelectTime(context),
+                        readOnly: true,
                         decoration: InputDecoration(
                           labelText: 'Time',
                           prefixIcon: const Icon(Icons.access_time),
@@ -458,7 +474,7 @@ class _DetailsAndBookState extends State<DetailsAndBook> {
                     ),
                     child: ElevatedButton(
                       onPressed: _isLoading
-                          ? null 
+                          ? null
                           : () async {
                               if (_formKey.currentState!.validate()) {
                                 try {

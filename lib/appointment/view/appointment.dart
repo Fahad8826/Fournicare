@@ -137,6 +137,24 @@ class AppointmentListPage extends StatelessWidget {
                             'No address provided',
                       ),
                       const SizedBox(height: 8),
+                      _buildInfoRow(
+                        Icons.description_outlined,
+                        'Description',
+                        appointment['desc']?.toString() ?? 'No description',
+                      ),
+                      const SizedBox(height: 8),
+                      _buildInfoRow(
+                        Icons.phone_outlined,
+                        'Phone',
+                        appointment['phone']?.toString() ?? 'No phone provided',
+                      ),
+                      const SizedBox(height: 8),
+                      _buildInfoRow(
+                        Icons.person_outline,
+                        'Age',
+                        appointment['age']?.toString() ?? 'Not specified',
+                      ),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Expanded(
